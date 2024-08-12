@@ -44,17 +44,31 @@ jobs:
         with:
           name: mochawesome-report
           path: ./public
-          
-      - name: Deploy to GitHub Pages
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          echo "<!DOCTYPE html><html><head><meta http-equiv=\"refresh\" content=\"0; url=./cypress/reports/report.html\" /></head></html>" > ./public/index.html
-          git add public/
+
+      - name: Commit and Push to gh-pages
+        run: |
+          git checkout --orphan gh-pages
+          git rm -rf .
+          mv ./public/* .
+          git add .
           git commit -m "Deploy Cypress Report"
-          git push origin HEAD:gh-pages --force
+          git push --force origin gh-pages          
+          
+      # - name: Deploy to GitHub Pages
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   run: |
+      #     git config --global user.name "github-actions[bot]"
+      #     git config --global user.email "github-actions[bot]@users.noreply.github.com"
+      #     echo "<!DOCTYPE html><html><head><meta http-equiv=\"refresh\" content=\"0; url=./cypress/reports/report.html\" /></head></html>" > ./public/index.html
+      #     git add public/
+      #     git commit -m "Deploy Cypress Report"
+      #     git push origin HEAD:gh-pages --force
 
       # - name: Deploy to GitHub Pages
       #   uses: peaceiris/actions-gh-pages@v4
