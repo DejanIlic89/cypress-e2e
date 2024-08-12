@@ -44,11 +44,22 @@ jobs:
         with:
           name: mochawesome-report
           path: ./public
-
+          
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages
-          publish_dir: ./public
-          force_orphan: true  # This option helps in creating the gh-pages branch if it doesn't exist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          echo "<!DOCTYPE html><html><head><meta http-equiv=\"refresh\" content=\"0; url=./cypress/reports/report.html\" /></head></html>" > ./public/index.html
+          git add .
+          git commit -m "Deploy Cypress Report"
+          git push origin HEAD:gh-pages --force
+
+      # - name: Deploy to GitHub Pages
+      #   uses: peaceiris/actions-gh-pages@v4
+      #   with:
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      #     publish_branch: gh-pages
+      #     publish_dir: ./public
+      #     force_orphan: true  # This option helps in creating the gh-pages branch if it doesn't exist
