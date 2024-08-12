@@ -36,8 +36,8 @@ jobs:
     needs: cypress-run
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      # - name: Checkout code
+      #   uses: actions/checkout@v4
 
       - name: Download Report Artifact
         uses: actions/download-artifact@v4
