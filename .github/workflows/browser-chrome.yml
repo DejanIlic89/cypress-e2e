@@ -2,7 +2,7 @@ name: Test On Chrome Browser
 on: workflow_dispatch
 jobs:
   chrome:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     name: E2E on Chrome
     steps:
       - uses: actions/checkout@v4
