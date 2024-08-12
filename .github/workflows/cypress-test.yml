@@ -36,8 +36,8 @@ jobs:
     needs: cypress-run
 
     steps:
-      # - name: Checkout code
-      #   uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Download Report Artifact
         uses: actions/download-artifact@v4
@@ -52,7 +52,7 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           echo "<!DOCTYPE html><html><head><meta http-equiv=\"refresh\" content=\"0; url=./cypress/reports/report.html\" /></head></html>" > ./public/index.html
-          git add .
+          git add ./public
           git commit -m "Deploy Cypress Report"
           git push origin HEAD:gh-pages --force
 
