@@ -72,3 +72,15 @@ jobs:
     #     with:
     #       github_token: ${{ secrets.GITHUB_TOKEN }}
     #       publish_dir: ./reports
+
+      - name: Slack Notification
+        if: success() || failure()
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_COLOR: ${{ job.status }} # or a specific color like 'good' or '#ff00ff'
+          SLACK_ICON: https://github.com/rtCamp.png?size=48
+          SLACK_MESSAGE: 'Test Automation Report :rocket: \n https://github.com/DejanIlic89/reports/report-${{ env.NEXT_REPORT_NUMBER }}/report.html'
+          SLACK_TITLE: Cypress Web Test
+          ENABLE_ESCAPES: true
+          SLACK_USERNAME: Test execution info
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
