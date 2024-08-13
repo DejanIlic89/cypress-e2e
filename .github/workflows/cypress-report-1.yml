@@ -25,12 +25,14 @@ jobs:
         run: npx cypress run
 
       - name: Checkout gh-pages branch
+        if: success() || failure()
         run: |
           git fetch origin gh-pages:gh-pages
           git checkout gh-pages
           mkdir -p reports
 
       - name: Determine next report number
+        if: success() || failure()
         id: report_number
         run: |
           number=$(ls reports | grep -Eo 'report-[0-9]+' | sed 's/report-//' | sort -n | tail -n 1)
@@ -40,11 +42,13 @@ jobs:
           echo "NEXT_REPORT_NUMBER=$((number + 1))" >> $GITHUB_ENV
 
       - name: Save report with ordinal number
+        if: success() || failure()
         run: |
           mkdir -p "reports/report-${{ env.NEXT_REPORT_NUMBER }}"
           cp -r cypress/reports/* "reports/report-${{ env.NEXT_REPORT_NUMBER }}"
 
       - name: Limit number of historical reports to 5
+        if: success() || failure()
         run: |
           max_reports=5
           report_dirs=$(ls -d reports/report-* | sort -V)
@@ -55,6 +59,7 @@ jobs:
           fi
 
       - name: Push reports to gh-pages
+        if: success() || failure()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
