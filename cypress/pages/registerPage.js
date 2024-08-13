@@ -6,7 +6,7 @@ export class registerPage {
         telephone: '#input-telephone',
         password: '#input-password',
         passwordConfirm: '#input-confirm',
-        policyCheckbox: 'input[type="checkbox"]',
+        policyCheckbox: 'input[type="checkbox"]-',
         continue: '.btn.btn-primary'
     }
 
