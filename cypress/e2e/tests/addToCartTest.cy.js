@@ -5,6 +5,7 @@ const homePageObj = new homePage()
 
 describe('test add to cart', () => {
 
+    //before
     before(() => {
         cy.login(testData.login.username, testData.login.password)
     })
