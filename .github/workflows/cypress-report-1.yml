@@ -62,8 +62,8 @@ jobs:
           git commit -m "Add report ${{ env.NEXT_REPORT_NUMBER }}"
           git push origin gh-pages
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./reports
+    #   - name: Deploy to GitHub Pages
+    #     uses: peaceiris/actions-gh-pages@v4
+    #     with:
+    #       github_token: ${{ secrets.GITHUB_TOKEN }}
+    #       publish_dir: ./reports
