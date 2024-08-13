@@ -1,9 +1,10 @@
 name: Run Cypress Tests and Deploy Report
 
-on:
-  push:
-    branches:
-      - main
+on: 
+  workflow_dispatch
+  # push:
+  #   branches:
+  #     - main
 
 jobs:
   cypress-run:
