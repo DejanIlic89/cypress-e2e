@@ -1,0 +1,65 @@
+name: Deploy Cypress Report to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main  # or your default branch
+
+jobs:
+  cypress-run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Cypress Tests
+        run: npx cypress run
+
+    #   - name: Generate Report (if using mochawesome)
+    #     run: npm run cypress:report  # Modify based on your report generation
+
+      - name: Setup Pages Directory
+        if: always()
+        run: |
+          mkdir -p ./gh-pages/history
+          REPORT_COUNT=$(ls -1 ./gh-pages/history | wc -l)
+          REPORT_COUNT=$((REPORT_COUNT + 1))
+          mv cypress/reports ./gh-pages/history/report_$REPORT_COUNT
+
+      - name: Deploy to GitHub Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./gh-pages
+          keep_files: true  # Retain history in the gh-pages branch
+
+  cleanup:
+    if: always()
+    needs: cypress-run
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+
+      - name: Limit History to Last 10 Reports
+        run: |
+          cd history
+          ls -t | tail -n +11 | xargs rm -rf  # Adjust the number to how many you want to keep
+          cd ..
+          git config --global user.email "theekey@gmail.com"
+          git config --global user.name "Dejan Ilic"
+          git add -A
+          git commit -m "Clean up old reports" || echo "No changes to commit"
+          git push
