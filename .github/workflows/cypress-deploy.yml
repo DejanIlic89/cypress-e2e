@@ -1,9 +1,11 @@
 name: Deploy Cypress Report to GitHub Pages
 
 on:
-  push:
-    branches:
-      - main  # or your default branch
+  workflow_dispatch
+
+#   push:
+#     branches:
+#       - main  # or your default branch
 
 jobs:
   cypress-run:
