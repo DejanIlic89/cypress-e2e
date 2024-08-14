@@ -4,12 +4,15 @@ on:
   push:
     branches:
       - main  # Or the branch you run your Cypress tests from
-  deployment_status:
-    types: [success]
+  workflow_run:
+    workflows: ["pages-build-deployment"]
+    types:
+      - completed
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    if: github.event_name == 'push'
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v4
@@ -71,7 +74,8 @@ jobs:
   notify-slack:
     runs-on: ubuntu-latest
     needs: build-and-deploy
-    if: github.event.deployment_status.state == 'success' && github.event.deployment_status.environment == 'github-pages'
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'
+    # if: github.event.deployment_status.state == 'success' && github.event.deployment_status.environment == 'github-pages'
     steps:
       - name: Get Latest Report URL
         id: get_pages_url
