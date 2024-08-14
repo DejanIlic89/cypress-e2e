@@ -1,0 +1,40 @@
+name: Deploy Cypress Reports to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main  # Or the branch you want to trigger the deploy
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Cypress tests
+        run: npx cypress run
+
+      - name: Deploy Cypress report to GitHub Pages
+        if: success() || failure()
+        run: |
+          # Create a directory to store the report
+          mkdir -p public/report
+          # Copy the report files to the public directory
+          cp -r cypress/reports/* public/report
+
+      - name: Deploy to GitHub Pages
+        if: success() || failure()
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public  # Directory where your report is located
