@@ -43,9 +43,10 @@
 name: Deploy Cypress Reports to GitHub Pages
 
 on:
-  push:
-    branches:
-      - main  # Or the branch you want to trigger the deploy
+    workflow_dispatch
+#   push:
+#     branches:
+#       - main  # Or the branch you want to trigger the deploy
 
       # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
