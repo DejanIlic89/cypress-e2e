@@ -1,10 +1,10 @@
 name: Cypress Tests and Deploy
 
 on:
-  workflow_dispatch
-  # push:
-  #   branches:
-  #     - main
+  # workflow_dispatch
+  push:
+    branches:
+      - main
 
 jobs:
   cypress-run:
@@ -73,6 +73,9 @@ jobs:
     #     with:
     #       github_token: ${{ secrets.GITHUB_TOKEN }}
     #       publish_dir: ./reports
+
+      - name: Wait for GH Pages to deploy
+        run: sleep 60
 
       - name: Slack Notification
         if: success() || failure()

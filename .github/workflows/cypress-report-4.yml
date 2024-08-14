@@ -1,13 +1,14 @@
 name: Deploy Cypress Reports to GitHub Pages and Notify Slack
 
 on:
-  push:
-    branches:
-      - main  # Or the branch you run your Cypress tests from
-  workflow_run:
-    workflows: ["pages-build-deployment"]
-    types:
-      - completed
+    workflow_dispatch
+#   push:
+#     branches:
+#       - main  # Or the branch you run your Cypress tests from
+#   workflow_run:
+#     workflows: ["pages-build-deployment"]
+#     types:
+#       - completed
 
 jobs:
   build-and-deploy:
