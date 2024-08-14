@@ -1,85 +1,85 @@
-# name: Deploy Cypress Reports and Notify Slack
+name: Deploy Cypress Reports and Notify Slack
 
-# on:
+on: workflow_dispatch
 #   push:
 #     branches:
 #       - main
 #   deployment_status:
 
-# jobs:
-#   build-and-deploy:
-#     runs-on: ubuntu-latest
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
 
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-#       - name: Set up Node.js
-#         uses: actions/setup-node@v4
-#         with:
-#           node-version: 18
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
 
-#       - name: Install dependencies
-#         run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-#       - name: Run Cypress tests
-#         run: npx cypress run
+      - name: Run Cypress tests
+        run: npx cypress run
 
-#       - name: Checkout gh-pages branch
-#         if: success() || failure()
-#         run: |
-#           git fetch origin gh-pages:gh-pages
-#           git checkout gh-pages
-#           mkdir -p reports
+      - name: Checkout gh-pages branch
+        if: success() || failure()
+        run: |
+          git fetch origin gh-pages:gh-pages
+          git checkout gh-pages
+          mkdir -p reports
 
-#       - name: Determine next report number
-#         if: success() || failure()
-#         id: report_number
-#         run: |
-#           number=$(ls reports | grep -Eo 'report-[0-9]+' | sed 's/report-//' | sort -n | tail -n 1)
-#           if [ -z "$number" ]; then
-#             number=0
-#           fi
-#           echo "NEXT_REPORT_NUMBER=$((number + 1))" >> $GITHUB_ENV
+      - name: Determine next report number
+        if: success() || failure()
+        id: report_number
+        run: |
+          number=$(ls reports | grep -Eo 'report-[0-9]+' | sed 's/report-//' | sort -n | tail -n 1)
+          if [ -z "$number" ]; then
+            number=0
+          fi
+          echo "NEXT_REPORT_NUMBER=$((number + 1))" >> $GITHUB_ENV
 
-#       - name: Save report with ordinal number
-#         if: success() || failure()
-#         run: |
-#           mkdir -p "reports/report-${{ env.NEXT_REPORT_NUMBER }}"
-#           cp -r cypress/reports/* "reports/report-${{ env.NEXT_REPORT_NUMBER }}"
+      - name: Save report with ordinal number
+        if: success() || failure()
+        run: |
+          mkdir -p "reports/report-${{ env.NEXT_REPORT_NUMBER }}"
+          cp -r cypress/reports/* "reports/report-${{ env.NEXT_REPORT_NUMBER }}"
 
-#       - name: Limit number of historical reports to 5
-#         if: success() || failure()
-#         run: |
-#           max_reports=5
-#           report_dirs=$(ls -d reports/report-* | sort -V)
-#           current_count=$(echo "$report_dirs" | wc -l)
-#           if [ "$current_count" -gt "$max_reports" ]; then
-#             reports_to_delete=$(echo "$report_dirs" | head -n $((current_count-max_reports)))
-#             echo "$reports_to_delete" | xargs rm -rf
-#           fi
+      - name: Limit number of historical reports to 5
+        if: success() || failure()
+        run: |
+          max_reports=5
+          report_dirs=$(ls -d reports/report-* | sort -V)
+          current_count=$(echo "$report_dirs" | wc -l)
+          if [ "$current_count" -gt "$max_reports" ]; then
+            reports_to_delete=$(echo "$report_dirs" | head -n $((current_count-max_reports)))
+            echo "$reports_to_delete" | xargs rm -rf
+          fi
 
-#       - name: Push reports to gh-pages
-#         if: success() || failure()
-#         run: |
-#           git config user.name "github-actions[bot]"
-#           git config user.email "github-actions[bot]@users.noreply.github.com"
-#           git add reports
-#           git commit -m "Add report ${{ env.NEXT_REPORT_NUMBER }}"
-#           git push origin gh-pages
+      - name: Push reports to gh-pages
+        if: success() || failure()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add reports
+          git commit -m "Add report ${{ env.NEXT_REPORT_NUMBER }}"
+          git push origin gh-pages
 
-#   notify-slack:
-#     runs-on: ubuntu-latest
-#     needs: build-and-deploy
-#     if: github.event.deployment_status.state == 'success' && github.event.deployment_status.environment == 'github-pages'
-#     steps:
-#       - name: Slack Notification
-#         uses: rtCamp/action-slack-notify@v2
-#         env:
-#           SLACK_COLOR: ${{ job.status }} # or a specific color like 'good' or '#ff00ff'
-#           SLACK_ICON: https://github.com/rtCamp.png?size=48
-#           SLACK_MESSAGE: 'Test Automation Report :rocket: \n https://dejanilic89.github.io/cypress-e2e/reports/report-${{ env.NEXT_REPORT_NUMBER }}/report.html'
-#           SLACK_TITLE: Cypress Web Test
-#           ENABLE_ESCAPES: true
-#           SLACK_USERNAME: Test execution info
-#           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+  notify-slack:
+    runs-on: ubuntu-latest
+    needs: build-and-deploy
+    if: github.event.deployment_status.state == 'success' && github.event.deployment_status.environment == 'github-pages'
+    steps:
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_COLOR: ${{ job.status }} # or a specific color like 'good' or '#ff00ff'
+          SLACK_ICON: https://github.com/rtCamp.png?size=48
+          SLACK_MESSAGE: 'Test Automation Report :rocket: \n https://dejanilic89.github.io/cypress-e2e/reports/report-${{ env.NEXT_REPORT_NUMBER }}/report.html'
+          SLACK_TITLE: Cypress Web Test
+          ENABLE_ESCAPES: true
+          SLACK_USERNAME: Test execution info
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}

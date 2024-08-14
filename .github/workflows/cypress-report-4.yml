@@ -25,31 +25,47 @@ jobs:
       - name: Run Cypress tests
         run: npx cypress run
 
-      - name: Save report with a unique identifier (timestamp)
-        id: save_report
+      - name: Checkout gh-pages branch
+        if: success() || failure()
         run: |
-          TIMESTAMP=$(date +"%Y%m%d%H%M%S")
-          REPORT_DIR="cypress/reports/report-$TIMESTAMP"
-          mkdir -p "$REPORT_DIR"
-          cp -r cypress/reports/* "$REPORT_DIR"
+          git fetch origin gh-pages:gh-pages
+          git checkout gh-pages
+          mkdir -p reports
 
-      - name: Limit the number of reports to 5
+      - name: Determine next report number
+        if: success() || failure()
+        id: report_number
         run: |
-          report_dirs=$(ls -d cypress/reports/report-* | sort -r)
-          report_count=$(echo "$report_dirs" | wc -l)
-          if [ "$report_count" -gt 5 ]; then
-            echo "$report_dirs" | tail -n +6 | xargs rm -rf
+          number=$(ls reports | grep -Eo 'report-[0-9]+' | sed 's/report-//' | sort -n | tail -n 1)
+          if [ -z "$number" ]; then
+            number=0
+          fi
+          echo "NEXT_REPORT_NUMBER=$((number + 1))" >> $GITHUB_ENV
+
+      - name: Save report with ordinal number
+        if: success() || failure()
+        run: |
+          mkdir -p "reports/report-${{ env.NEXT_REPORT_NUMBER }}"
+          cp -r cypress/reports/* "reports/report-${{ env.NEXT_REPORT_NUMBER }}"
+
+      - name: Limit number of historical reports to 5
+        if: success() || failure()
+        run: |
+          max_reports=5
+          report_dirs=$(ls -d reports/report-* | sort -V)
+          current_count=$(echo "$report_dirs" | wc -l)
+          if [ "$current_count" -gt "$max_reports" ]; then
+            reports_to_delete=$(echo "$report_dirs" | head -n $((current_count-max_reports)))
+            echo "$reports_to_delete" | xargs rm -rf
           fi
 
-      - name: Deploy to gh-pages branch
+      - name: Push reports to gh-pages
+        if: success() || failure()
         run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
-          git fetch origin gh-pages
-          git checkout gh-pages || git checkout --orphan gh-pages
-          cp -r cypress/reports/* .
-          git add .
-          git commit -m "Deploy Cypress report"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add reports
+          git commit -m "Add report ${{ env.NEXT_REPORT_NUMBER }}"
           git push origin gh-pages
 
   notify-slack:
